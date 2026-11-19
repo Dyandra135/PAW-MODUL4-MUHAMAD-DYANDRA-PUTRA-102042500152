@@ -16,7 +16,7 @@
         <div class="card shadow-sm">
             <div class="card-body p-4">
                 {{-- TODO 8: Tambahkan atribut enctype="multipart/form-data" pada form di bawah ini --}}
-                <form action="{{ route('buku.update', $buku->id) }}" method="POST">
+                <form action="{{ route('buku.update', $buku->id) }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     @method('PUT')
 
@@ -65,7 +65,36 @@
                     </div>
 
                     {{-- TODO 8: Tampilkan gambar sampul saat ini ($buku->cover) dan sediakan input file untuk mengganti sampul --}}
+                    <div class="mb-3">
+                        <label for="cover" class="form-label fw-semibold">Sampul Buku</label>
 
+                        <input
+                            type="file"
+                            class="form-control @error('cover') is-invalid @enderror"
+                            id="cover"
+                            name="cover"
+                            accept="image/jpeg,image/png"
+                            onchange="previewImage(event)"
+                        >
+
+                        @error('cover')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+
+                        <div class="mt-3">
+                            <img
+                                id="imagePreview"
+                                src="{{ $buku->cover ? asset('storage/' . $buku->cover) : '#' }}"
+                                alt="Pratinjau sampul buku"
+                                class="img-thumbnail {{ $buku->cover ? '' : 'd-none' }}"
+                                style="max-width: 200px; max-height: 280px; object-fit: cover;"
+                            >
+                        </div>
+
+                        <small class="form-text text-muted">
+                            Kosongkan jika tidak ingin mengganti sampul. Format JPG, JPEG, atau PNG, maksimal 2 MB.
+                        </small>
+                    </div>
                     <div class="d-flex justify-content-end gap-2">
                         <a href="{{ route('buku.index') }}" class="btn btn-light border px-4">Batal</a>
                         <button type="submit" class="btn btn-primary px-4">
@@ -78,4 +107,22 @@
     </div>
 </div>
 @endsection
+
+<script>
+    function previewImage(event) {
+        const input = event.target;
+
+        if (input.files && input.files[0]) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const preview = document.getElementById('imagePreview');
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            };
+
+            reader.readAsDataURL(input.files[0]);
+        }
+    }
+</script>
 
